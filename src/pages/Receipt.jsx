@@ -2,21 +2,24 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, Download, Home, ArrowLeft } from 'lucide-react';
 import useCartStore from '../store/cartStore';
+import useAuthStore from '../store/authStore';
 
 const Receipt = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCartStore();
+  const { addReceipt } = useAuthStore();
   
   // Get order data from location state or use defaults
   const orderData = location.state || {
     items: [],
     total: 0,
-    paymentMethod: 'Orange Money'
+    paymentMethod: 'Orange Money',
+    orderId: 'FF' + Date.now().toString().slice(-8)
   };
   
   const [orderDetails] = React.useState({
-    id: 'FF' + Date.now().toString().slice(-8), // Simple 10-digit ID: FF + timestamp
+    id: orderData.orderId || 'FF' + Date.now().toString().slice(-8),
     date: new Date().toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
@@ -27,6 +30,17 @@ const Receipt = () => {
     status: 'Payé',
     paymentMethod: orderData.paymentMethod
   });
+
+  // Save receipt to authStore on mount
+  React.useEffect(() => {
+    addReceipt({
+      orderId: orderDetails.id,
+      items: orderData.items,
+      total: orderData.total + 1000, // including delivery fee
+      paymentMethod: orderDetails.paymentMethod,
+      status: orderDetails.status
+    });
+  }, []);
 
   const handlePrint = () => {
     window.print();

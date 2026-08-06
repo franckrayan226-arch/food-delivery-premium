@@ -4,11 +4,13 @@ import { ArrowLeft, MapPin, Phone, CreditCard } from 'lucide-react';
 import Footer from '../components/Footer';
 import { WaveLogo, OrangeMoneyLogo, MoovMoneyLogo, TelecelMoneyLogo, VisaLogo, MastercardLogo } from '../components/PaymentLogos';
 import useCartStore from '../store/cartStore';
+import useAuthStore from '../store/authStore';
 import { getRestaurantById } from '../services/data';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, restaurantId, clearCart } = useCartStore();
+  const { addOrder } = useAuthStore();
   const restaurant = restaurantId ? getRestaurantById(restaurantId) : null;
   const [formData, setFormData] = useState({
     name: '',
@@ -34,12 +36,27 @@ const Checkout = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const paymentMethod = e.target.payment?.value || 'Orange Money';
+    
+    // Save order to authStore
+    const orderId = 'FF' + Date.now().toString().slice(-8);
+    addOrder({
+      id: orderId,
+      restaurant: restaurant?.name || 'Restaurant',
+      items,
+      total: total + deliveryFee,
+      address: formData.address,
+      phone: formData.phone,
+      paymentMethod,
+      status: 'pending'
+    });
+    
     console.log('Order submitted:', { formData, items, total });
     navigate('/receipt', {
       state: {
         items,
         total,
-        paymentMethod
+        paymentMethod,
+        orderId
       }
     });
   };

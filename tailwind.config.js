@@ -45,9 +45,9 @@ export default {
         info: '#5C6B7A',
       },
       fontFamily: {
-        sans: ['Manrope', 'system-ui', 'sans-serif'],
+        sans: ['Nexa', 'Manrope', 'system-ui', 'sans-serif'],
         display: ['Manrope', 'sans-serif'],
-        body: ['Manrope', 'sans-serif'],
+        body: ['Nexa', 'Manrope', 'sans-serif'],
         serif: ['Playfair Display', 'Georgia', 'serif'],
         mono: ['IBM Plex Mono', 'monospace'],
       },

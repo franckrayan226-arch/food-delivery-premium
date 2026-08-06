@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Bell, ShoppingBag } from 'lucide-react';
+import { Search, MapPin, Bell, ShoppingCart, ShoppingBag } from 'lucide-react';
 import Footer from '../components/Footer';
 import RestaurantCard from '../components/RestaurantCard';
+import HeroBanner from '../components/HeroBanner';
 import { restaurants } from '../services/data';
+import useCartStore from '../store/cartStore';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -51,8 +53,23 @@ const Home = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-4">
+              <svg
+                style={{ width: '40px', height: '40px' }}
+                viewBox="0 0 140 140"
+                fill="none"
+              >
+                <ellipse cx="70" cy="70" rx="44" ry="52" stroke="#C1652E" strokeWidth="2" fill="none"/>
+                <path d="M38 50 Q70 22 102 50" stroke="#C1652E" strokeWidth="1.5" fill="none" opacity="0.6"/>
+                <line x1="70" y1="22" x2="70" y2="38" stroke="#C1652E" strokeWidth="1" opacity="0.4"/>
+                <path d="M50 62 Q58 56 66 62 Q58 68 50 62Z" fill="#C1652E" opacity="0.85"/>
+                <path d="M74 62 Q82 56 90 62 Q82 68 74 62Z" fill="#C1652E" opacity="0.85"/>
+                <path d="M70 62 L64 84 L76 84 Z" fill="#8B7355" opacity="0.7"/>
+                <path d="M56 96 Q70 104 84 96" stroke="#C1652E" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                <line x1="46" y1="78" x2="54" y2="78" stroke="#C1652E" strokeWidth="0.8" opacity="0.3"/>
+                <line x1="86" y1="78" x2="94" y2="78" stroke="#C1652E" strokeWidth="0.8" opacity="0.3"/>
+                <circle cx="70" cy="70" r="3" fill="#C1652E" opacity="0.2"/>
+              </svg>
               <div className="flex flex-col">
-                <h1 className="text-xl font-display font-bold text-text-primary tracking-tight">FasoFree</h1>
                 <p className="text-xs text-text-secondary flex items-center gap-1.5 mt-0.5">
                   <MapPin size={11} strokeWidth={1.5} />
                   Ouagadougou
@@ -107,51 +124,9 @@ const Home = () => {
         </div>
       </header>
 
-      {/* Banner Section with African Pattern */}
+      {/* Hero Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="relative h-48 overflow-hidden rounded-photo" style={{
-          backgroundColor: '#FAF6EF',
-          backgroundImage: `
-            repeating-linear-gradient(
-              0deg,
-              transparent 0px,
-              transparent 30px,
-              rgba(193, 101, 46, 0.06) 30px,
-              rgba(193, 101, 46, 0.06) 32px,
-              transparent 32px,
-              transparent 60px
-            ),
-            repeating-linear-gradient(
-              90deg,
-              transparent 0px,
-              transparent 30px,
-              rgba(92, 107, 60, 0.06) 30px,
-              rgba(92, 107, 60, 0.06) 32px,
-              transparent 32px,
-              transparent 60px
-            ),
-            radial-gradient(circle at 25% 25%, rgba(193, 101, 46, 0.08) 0%, transparent 30%),
-            radial-gradient(circle at 75% 75%, rgba(184, 134, 46, 0.08) 0%, transparent 30%)
-          `
-        }}>
-          {/* African geometric triangles */}
-          <svg className="absolute inset-0 w-full h-full opacity-6" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="african-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-                <polygon points="30,5 55,25 45,55 15,55 5,25" fill="none" stroke="rgba(193, 101, 46, 0.15)" strokeWidth="1" />
-                <polygon points="30,15 45,25 40,45 20,45 15,25" fill="rgba(92, 107, 60, 0.08)" />
-                <circle cx="30" cy="30" r="3" fill="rgba(184, 134, 46, 0.15)" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#african-pattern)" />
-          </svg>
-          
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <h2 className="text-lg font-display font-bold text-white mb-1">Découvrez nos restaurants</h2>
-            <p className="text-white/80 text-sm">Livraison rapide et repas de qualité.</p>
-          </div>
-        </div>
+        <HeroBanner />
       </section>
 
       {/* Restaurant List */}

@@ -5,14 +5,22 @@ import Footer from '../components/Footer';
 import { getRestaurantById } from '../services/data';
 import useCartStore from '../store/cartStore';
 
-const FavoriteIcon = ({ filled, color, inactiveColor = '#8C8275', size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+const FavoriteIcon = ({ filled, color, inactiveColor = '#8C8275', size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <defs>
+      <linearGradient id={`heart-gradient-${filled ? 'filled' : 'empty'}`} x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={filled ? color : inactiveColor} stopOpacity={filled ? 1 : 0.3} />
+        <stop offset="100%" stopColor={filled ? color : inactiveColor} stopOpacity={filled ? 0.8 : 0.1} />
+      </linearGradient>
+    </defs>
     <path
-      d="M8 14L1.5 7.5V4.5L4 2H6.5L8 3.5L9.5 2H12L14.5 4.5V7.5L8 14Z"
-      fill={filled ? color : 'transparent'}
+      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      fill={filled ? `url(#heart-gradient-filled)` : 'none'}
       stroke={filled ? color : inactiveColor}
       strokeWidth="1.5"
-      strokeLinejoin="miter"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transition: 'all 0.3s ease' }}
     />
   </svg>
 );

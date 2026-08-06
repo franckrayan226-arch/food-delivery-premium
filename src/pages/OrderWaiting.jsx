@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Clock, MapPin, Phone, Check, X } from 'lucide-react';
+import { getCurrentPosition, calculateDistanceAndTime, estimateDeliveryTime } from '../services/locationService';
 
 const OrderWaiting = () => {
   const navigate = useNavigate();
@@ -9,13 +10,34 @@ const OrderWaiting = () => {
   
   const [orderStatus, setOrderStatus] = useState('preparing');
   const [estimatedTime, setEstimatedTime] = useState(25);
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [canConfirmReceipt, setCanConfirmReceipt] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [distance, setDistance] = useState(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
-    }, 1000);
+    // Get user location and calculate delivery time
+    const initLocation = async () => {
+      try {
+        const position = await getCurrentPosition();
+        setUserLocation(position);
+        
+        // For demo, use restaurant coordinates (in real app, get from order)
+        const restaurantCoords = { lat: 12.3714, lng: -1.5197 };
+        
+        const result = await calculateDistanceAndTime(position, restaurantCoords);
+        if (result.distance > 0) {
+          setDistance(result.distance);
+          const timeEstimate = estimateDeliveryTime(result.distance);
+          setEstimatedTime(timeEstimate.totalMinutes);
+        }
+      } catch (error) {
+        console.error('Location error:', error);
+        // Fallback to default time
+        setEstimatedTime(25);
+      }
+    };
+
+    initLocation();
 
     // Simulate order status changes
     const statusTimer = setTimeout(() => {
@@ -24,7 +46,6 @@ const OrderWaiting = () => {
     }, 15000); // After 15 seconds, show as delivering
 
     return () => {
-      clearInterval(timer);
       clearTimeout(statusTimer);
     };
   }, []);
@@ -38,8 +59,6 @@ const OrderWaiting = () => {
       navigate('/');
     }
   };
-
-  const remainingTime = Math.max(0, estimatedTime - elapsedTime);
 
   return (
     <div className="min-h-screen bg-background-primary">
@@ -143,17 +162,11 @@ const OrderWaiting = () => {
 
         {/* Estimated Time */}
         <div className="bg-white border border-border-light p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Clock size={24} className="text-text-secondary" strokeWidth={1.5} />
-              <div>
-                <p className="text-sm text-text-secondary">Temps estimé</p>
-                <p className="text-lg font-mono font-bold text-text-primary">{remainingTime} min</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-text-secondary">Écoulé</p>
-              <p className="text-lg font-mono font-bold text-text-primary">{elapsedTime} min</p>
+          <div className="flex items-center gap-3">
+            <Clock size={24} className="text-text-secondary" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm text-text-secondary">Temps estimé</p>
+              <p className="text-lg font-mono font-bold text-text-primary">{estimatedTime} min</p>
             </div>
           </div>
         </div>

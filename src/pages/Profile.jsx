@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Phone, Heart, ArrowLeft, LogOut, Settings, Bell, CreditCard } from 'lucide-react';
+import { User, MapPin, Phone, Heart, ArrowLeft, LogOut, Settings, Bell, CreditCard, Receipt as ReceiptIcon, Package } from 'lucide-react';
 import Footer from '../components/Footer';
+import useAuthStore from '../store/authStore';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user, orders, receipts, logout, updateUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'Jean Dupont',
-    email: 'jean.dupont@email.com',
-    phone: '+226 70 00 00 00',
-    address: 'Patte d Oie, Ouagadougou',
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    address: '',
   });
 
   const favoriteItems = [
@@ -35,12 +37,17 @@ const Profile = () => {
     { icon: CreditCard, label: 'Modes de paiement', action: () => {} },
     { icon: Bell, label: 'Notifications', action: () => {} },
     { icon: Settings, label: 'Paramètres', action: () => {} },
-    { icon: LogOut, label: 'Déconnexion', action: () => {}, variant: 'danger' },
+    { icon: LogOut, label: 'Déconnexion', action: handleLogout, variant: 'danger' },
   ];
 
   const handleSave = () => {
+    updateUser({ name: formData.name, email: formData.email });
     setIsEditing(false);
-    // TODO: Save profile data
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
   };
 
   return (
@@ -138,43 +145,83 @@ const Profile = () => {
             )}
           </div>
 
+          {/* Orders */}
+          <div className="border border-border-light p-4">
+            <div className="flex items-center gap-2 mb-6">
+              <Package size={16} className="text-accent-primary" strokeWidth={1.5} />
+              <h2 className="text-sm font-medium text-text-secondary">Mes commandes</h2>
+            </div>
+
+            {orders.length > 0 ? (
+              <div className="space-y-3">
+                {orders.map((order, index) => (
+                  <div key={index} className="bg-background-secondary p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-mono text-text-primary">{order.id || `FF${Date.now().toString().slice(-8)}`}</span>
+                      <span className="text-xs text-text-secondary">
+                        {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                    <p className="text-sm text-text-primary">{order.restaurant || 'Restaurant'}</p>
+                    <p className="text-xs text-text-secondary">{order.items?.length || 0} article(s)</p>
+                    <p className="text-sm font-mono mt-1" style={{ color: '#C1652E' }}>
+                      {(order.total || 0).toLocaleString()} FCFA
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Package size={32} className="mx-auto text-text-secondary mb-4" strokeWidth={1.5} />
+                <p className="text-text-secondary text-sm">Aucune commande pour le moment</p>
+              </div>
+            )}
+          </div>
+
+          {/* Receipts */}
+          <div className="border border-border-light p-4">
+            <div className="flex items-center gap-2 mb-6">
+              <ReceiptIcon size={16} className="text-accent-primary" strokeWidth={1.5} />
+              <h2 className="text-sm font-medium text-text-secondary">Mes reçus</h2>
+            </div>
+
+            {receipts.length > 0 ? (
+              <div className="space-y-3">
+                {receipts.map((receipt, index) => (
+                  <div key={index} className="bg-background-secondary p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-mono text-text-primary">{receipt.orderId}</span>
+                      <span className="text-xs text-text-secondary">
+                        {new Date(receipt.createdAt).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                    <p className="text-sm text-text-primary">{receipt.paymentMethod || 'Paiement'}</p>
+                    <p className="text-xs text-text-secondary">{receipt.status || 'Payé'}</p>
+                    <p className="text-sm font-mono mt-1" style={{ color: '#C1652E' }}>
+                      {(receipt.total || 0).toLocaleString()} FCFA
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <ReceiptIcon size={32} className="mx-auto text-text-secondary mb-4" strokeWidth={1.5} />
+                <p className="text-text-secondary text-sm">Aucun reçu pour le moment</p>
+              </div>
+            )}
+          </div>
+
           {/* Favorites */}
           <div className="border border-border-light p-4">
             <div className="flex items-center gap-2 mb-6">
-              <Heart size={16} className="text-accent-primary" strokeWidth={1.5} />
+              <Heart size={20} className="text-accent-primary" strokeWidth={1.5} />
               <h2 className="text-sm font-medium text-text-secondary">Favoris</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {favoriteItems.map((item) => (
-                <div key={item.id} className="relative group cursor-pointer">
-                  <div className="relative h-32 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover rounded-photo transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <button className="absolute top-2 right-2 p-2 bg-background-secondary/90 backdrop-blur-sm text-error">
-                      <Heart size={14} className="fill-current" strokeWidth={1.5} />
-                    </button>
-                  </div>
-                  <div className="mt-2">
-                    <h3 className="font-medium text-text-primary text-sm">{item.name}</h3>
-                    <p className="text-xs text-text-secondary">{item.restaurant}</p>
-                    <p className="font-mono text-sm mt-1" style={{ color: '#C1652E' }}>
-                      {item.price.toLocaleString()} FCFA
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-8">
+              <Heart size={48} className="mx-auto text-text-secondary mb-4" strokeWidth={1} />
+              <p className="text-text-secondary text-sm">Aucun favori pour le moment</p>
             </div>
-
-            {favoriteItems.length === 0 && (
-              <div className="text-center py-8">
-                <Heart size={32} className="mx-auto text-text-secondary mb-4" strokeWidth={1.5} />
-                <p className="text-text-secondary text-sm">Aucun favori pour le moment</p>
-              </div>
-            )}
           </div>
 
           {/* Menu Items */}
@@ -190,7 +237,7 @@ const Profile = () => {
                     onClick={item.action}
                     className={`w-full flex items-center gap-4 p-4 transition-colors ${
                       isDanger
-                        ? 'hover:bg-error/10 text-error'
+                        ? 'hover:bg-red-50 text-red-600'
                         : 'hover:bg-background-secondary text-text-primary'
                     }`}
                   >
